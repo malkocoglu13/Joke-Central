@@ -1,8 +1,10 @@
+
 import express from "express";
 import bodyParser from "body-parser";
 import axios from "axios";
-require('dotenv').config(); // Load environment variables
+import dotenv from "dotenv"; // Import dotenv
 
+dotenv.config(); // Load environment variables from .env file
 const app = express();
 const port = 3000;
 
@@ -13,6 +15,7 @@ app.get("/", (req, res) => {
   res.render("index.ejs", { content: null }); // Render the initial page
 });
 
+
 app.post("/joke", async (req, res) => {
   try {
     const categoryOption = req.body.category;
@@ -20,14 +23,13 @@ app.post("/joke", async (req, res) => {
     const blacklistOption = req.body.blacklist;
     const joketypeOption = req.body.joketype;
 
-    const apiUrl = process.env.API_ENDPOINT; // Use the API endpoint from environment variables
-
     const response = await axios.get(
-      `${apiUrl}${(languageOption || blacklistOption || joketypeOption) ? '?' : ''}${languageOption ? `lang=${languageOption}` : ''}${languageOption && (blacklistOption || joketypeOption) ? '&' : ''}${blacklistOption ? `blacklistFlags=${blacklistOption}` : ''}${blacklistOption && joketypeOption ? '&' : ''}${joketypeOption ? `type=${joketypeOption}` : ''}`
+      `${process.env.API_URL}/${categoryOption}${(languageOption || blacklistOption || joketypeOption) ? '?' : ''}${languageOption ? `lang=${languageOption}` : ''}${languageOption && (blacklistOption || joketypeOption) ? '&' : ''}${blacklistOption ? `blacklistFlags=${blacklistOption}` : ''}${blacklistOption && joketypeOption ? '&' : ''}${joketypeOption ? `type=${joketypeOption}` : ''}`
     );
-
-    console.log("API URL:", apiUrl);
+    console.log("API URL:", response);
     const result = response.data;
+
+    const apiUrl = response.config.url; // Get the API URL from the Axios response
 
     res.render("index.ejs", {
       data: result,
@@ -40,6 +42,7 @@ app.post("/joke", async (req, res) => {
     });
   }
 });
+
 
 app.listen(port, () => {
   console.log(`Server running on port: ${port}`);
